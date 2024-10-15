@@ -1,4 +1,9 @@
 /* 공통 스타일 */
+
+h2{
+	text-align: center;
+	
+}
 body {
     font-family: Arial, sans-serif;
     background-color: #f4f4f9;
@@ -118,15 +123,26 @@ body {
 }
 
 #write_btn {
-    background-color: #007bfft;
+    background-color: #5656e3;
     color: white;
     border: none;
     padding: 10px 20px;
     font-size: 14px;
     cursor: pointer;
     border-radius: 5px;
+    margin-left: 10px;
 }
 
 #write_btn:hover {
     background-color: #0056b3;
+}
+#search_btn{
+	background-color: #838973;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    font-size: 14px;
+    cursor: pointer;
+    border-radius: 5px;
+    margin-left: 10px;
 }

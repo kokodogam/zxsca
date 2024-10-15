@@ -61,7 +61,7 @@
             </c:choose>
 
             <!-- 회원인 경우 글등록할 수 있도록 글등록 버튼 구현 -->
-             <c:if test="${not empty member}">
+             
                 <tr>
                     <td colspan="5">
                         <a href="${pageContext.request.contextPath}/board/write.do">
@@ -71,7 +71,7 @@
 
                 </tr>
 
-             </c:if>
+            
             
         </table>
 

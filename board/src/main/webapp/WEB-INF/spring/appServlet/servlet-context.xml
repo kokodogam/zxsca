@@ -30,7 +30,7 @@
 	<!-- 인터셉터 관련 설정 -->
 	<interceptors>
 		<interceptor>
-			<mapping path="/**/*.do"/>
+			<mapping path="/**/*.doo"/>
 			
 			<!-- 인터셉터에서 제외되는 URL 목록 정의 -->
 			

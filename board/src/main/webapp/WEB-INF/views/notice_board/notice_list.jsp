@@ -6,11 +6,11 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>글목록</title>
+<title>사내 공지</title>
 </head>
 <body>
 <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/resources/css/notice_list.css">
- 
+ <h2> 사내 공지 </h2>
     <div id="wrap">
         <table id="board-table"
         	class="board-table">
@@ -34,7 +34,7 @@
                     <c:otherwise>
                         <c:forEach var="notice" items="${noticeList}" varStatus="vs">
                             <tr>
-                                <td>${vs.count}</td>
+                                <td>${noticeList[vs.count-1].nb_idx}</td>
                                 <td>
                                     <a href="${pageContext.request.contextPath}/notice_board/view.do?nb_idx=${notice.nb_idx}">
                                         ${notice.nb_title}
@@ -82,12 +82,17 @@
                     <input type="text" name="searchWord" class="search-word" >
                     <input type="submit" id="search_btn" value="검색">
         <c:if test="${not empty member}">
+                <tr>
+                    <td colspan="6">
             
-              <a class= "button-box" href="${pageContext.request.contextPath}/notice_board/write.do">
-                    <button type="button" id="write_btn">글 등록</button> 
+              <a class="button-box" href="${pageContext.request.contextPath}/notice_board/write.do">
+                    <button type="button" id="write_btn">글 쓰기</button> 
                 </a>
-                </c:if>
-         
+                  </td>
+
+                </tr>
+
+             </c:if>    
              
             
       

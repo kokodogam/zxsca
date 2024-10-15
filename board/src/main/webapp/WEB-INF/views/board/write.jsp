@@ -11,8 +11,9 @@
     <h2>글목록</h2>
     <div id="container">
         <form name="frmBoardWrite" action="writeProcess.do" method="post">
-            <input type="hidden" name="m_idx" value="${member.m_idx}">
-            작성자: <input type="text" name="b_writer" value="${member.member_name}" readonly><br>
+            <!-- 회원번호 입력을 직접 받도록 변경 -->
+            회원번호: <input type="text" name="m_idx" placeholder="시번을 입력하세요."><br>
+            작성자: <input type="text" name="b_writer" placeholder="작성자를 입력하세요"><br>
             제목: <input type="text" name="b_title" ><br>
             내용<br>
             <textarea name="b_content" cols="30" rows="10"></textarea>
@@ -22,10 +23,7 @@
                 <input type="button" value="목록보기" onclick="location.href='../index.do'">
             </div>
         </form>
-
     </div>
 </div>
-
-
 </body>
 </html>
