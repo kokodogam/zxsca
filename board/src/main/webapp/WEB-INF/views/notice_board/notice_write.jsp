@@ -59,8 +59,8 @@ input[type=file]{
     <div id="container">
     	<!-- 파일업로드를 하는 form태그: method는 post방식으로, enctype="multipart/form-data"속성 정의 -->
         <form name="frmNoticeWrite" action="writeProcess.do" method="post" enctype="multipart/form-data">
-            <input type="hidden" name="m_idx" value="${member.m_idx}">
-            작성자: <input type="text" name="nb_writer" value="${member.member_name}" readonly><br>
+            사원번호<input type="text" name="m_idx" placeholder="사번을 입력하세요."><br>
+            작성자: <input type="text" name="nb_writer" placeholder="작성자를 입력하세요"><br>
             제목: <input type="text" name="nb_title"><br>
             내용<br>
             <textarea name="nb_content" cols="30" rows="10"></textarea><br>

@@ -12,7 +12,7 @@
     <div id="container">
         <form name="frmBoardWrite" action="writeProcess.do" method="post">
             <!-- 회원번호 입력을 직접 받도록 변경 -->
-            회원번호: <input type="text" name="m_idx" placeholder="시번을 입력하세요."><br>
+           사원번호: <input type="text" name="m_idx" placeholder="시번을 입력하세요."><br>
             작성자: <input type="text" name="b_writer" placeholder="작성자를 입력하세요"><br>
             제목: <input type="text" name="b_title" ><br>
             내용<br>

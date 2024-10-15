@@ -81,19 +81,12 @@
                     </select>
                     <input type="text" name="searchWord" class="search-word" >
                     <input type="submit" id="search_btn" value="검색">
-        <c:if test="${not empty member}">
-                <tr>
-                    <td colspan="6">
+      
             
               <a class="button-box" href="${pageContext.request.contextPath}/notice_board/write.do">
                     <button type="button" id="write_btn">글 쓰기</button> 
                 </a>
-                  </td>
-
-                </tr>
-
-             </c:if>    
-             
+           
             
       
 	</form>
