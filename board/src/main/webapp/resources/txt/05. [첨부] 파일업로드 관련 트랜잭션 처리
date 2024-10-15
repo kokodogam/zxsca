@@ -1,0 +1,90 @@
+>>> 트랜잭션 처리 <<<
+
+	1. 트랜잭션 처리 관련 API를 pom.xml에 의존모듈로 추가하기
+
+	<dependency>
+		<groupId>org.springframework</groupId>
+		<artifactId>spring-context</artifactId>
+		<version>${org.springframework-version}</version>
+	</dependency>
+	
+	<dependency>
+		<groupId>org.springframework</groupId>
+		<artifactId>spring-tx</artifactId>
+		<version>${org.springframework-version}</version>
+	</dependency>
+
+	2. root.context.xml 파일에 트랜잭션 객체를 빈 등록
+
+	<!--  트랜잭션 매니저 빈 등록 -->
+	<bean id="transactionManager"
+		  class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		  <property name="dataSource" ref="dataSource"/>
+	</bean>
+	
+	<!--  트랜잭션 관리 활성화 : namespace 탭에서 tx 체크 -->
+	<tx:annotation-driven transaction-manager="transactionManager" />
+	
+3. DAO에 트랜잭션 처리 객체를 의존 자동주입 받기
+
+	private PlatformTransactionManager transactionManager;
+	
+	
+4. DAO에서 트랜잭션을 처리해야 하는 메소드에 트랜잭션 처리하기
+
+
+//공지사항 등록: 공지사항 입력 + 첨부파일 입력 : 트랜잭션 처리 필요
+	@Transactional //트랜잭션을 적용하는 메소드에 붙여줌
+	public int insertNotice(NoticeVO vo) throws RuntimeException{
+		int result = 0; //입력실패시 결과값
+		
+		//트랜잭션을 처리할 수 있는 트랜잭션 상태 객체 정의
+		TransactionStatus txStatus = 
+				transactionManager.getTransaction(new DefaultTransactionDefinition());
+		
+		try {
+			
+			sqlSession.insert(MAPPER+".insertNotice", vo);
+			
+			//아직 공지사항 테이블에 입력값이 반영이 되지 않아서 nb_idx값이 생성되지 않은 상태이므로
+			//기존에 저장된 공지사항 번호 중 최고값을 조회해서 1을 더해서 첨부파일의 nb_idx로 세팅함
+			int nb_idx = sqlSession.selectOne(MAPPER+".getMaxNb_idx");
+			
+			List<NoticeAttachedVO> attachedList = vo.getAttachedList();
+			for(NoticeAttachedVO naVo : attachedList) {
+				naVo.setNb_idx(nb_idx);
+				sqlSession.insert(MAPPER+".insertAttached", naVo);
+			}
+			
+			result = 1; //입력성공시 결과값
+			
+		} catch (Exception e) {
+			System.out.println("공지사항 입력 중 예외발생");
+			
+			transactionManager.rollback(txStatus); //예외 발생 시 롤백 처리
+			throw e; //예외 발생시킴 - throws RuntimeException으로 처리
+		}
+		
+		transactionManager.commit(txStatus);//정상적으로 처리되면 커밋 처리
+		
+		return result;
+	}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

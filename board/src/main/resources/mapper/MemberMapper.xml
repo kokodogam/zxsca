@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.human.web.mapper.MemberMapper">
+<!-- namespace: XML 파일에서 내용의 구분을 위해서 사용 -->
+
+	<!-- 아이디 중복검사 -->
+	<select id="checkId" parameterType="string" resultType="_int">
+	
+		select count(*) from tb_member where member_id = #{member_id}
+	
+	</select>
+
+	<!-- 회원가입 -->
+	<insert id="insertMember" parameterType="memberVO">
+	
+		insert into tb_member (member_name,member_id,member_pw,phone,birthday)
+				 values (#{member_name}, #{member_id}, #{member_pw}, #{phone},#{birthday})
+	
+	</insert>
+	
+	<!-- 로그인(비밀번호 암호화 전) 
+	<select id="login" parameterType="map" resultType="memberVO">
+	
+		select * from tb_member
+			where member_id=#{member_id}
+			and member_pw=#{member_pw}
+			and member_status='N'
+	
+	</select> -->
+	
+	<!--  로그인(비밀번호 암호화 후) -->
+	<select id="getPassword" parameterType="string" resultType="string">
+	
+		select member_pw from tb_member
+			where member_id = #{member_id}
+			and member_status = 'N'
+			
+	</select>
+	
+		<select id="login" parameterType="string" resultType="memberVO">
+	
+		select * from tb_member
+			where member_id = #{member_id}
+			and member_status = 'N'
+			
+	</select>
+	
+	<!-- 회원정보 변경 -->
+	<update id="updateMember" parameterType="memberVO">
+	
+		update tb_member set member_name=#{member_name},
+			member_pw=#{member_pw},
+			birthday=#{birthday},
+			phone=#{phone}
+			where m_idx=#{m_idx}
+	
+	</update>
+	
+	<!-- 회원조회 -->
+	<select id="getMember" parameterType="_int" resultType="memberVO">
+		
+		select * from tb_member
+			where m_idx=#{m_idx}
+	
+	</select>
+	
+	<!-- 회원탈퇴 -->
+	<update id="cancel" parameterType="_int">
+	
+		update tb_member set member_status='Y',	update_date=now()
+			where m_idx=#{m_idx}
+	
+	</update>
+	
+	
+	
+	
+	
+	
+	
+</mapper>	

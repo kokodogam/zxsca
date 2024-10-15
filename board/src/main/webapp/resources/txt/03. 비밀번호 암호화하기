@@ -1,0 +1,185 @@
+>>> 회원관리시스템에서 적용된 비밀번호 암호화 <<<
+
+1. pom.xml에 메일인증 관련 의존모듈 추가하기
+
+		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-core</artifactId>
+			<version>5.4.2</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-web</artifactId>
+			<version>5.4.2</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-config</artifactId>
+			<version>5.4.2</version>
+		</dependency>
+
+
+2. security-context.xml 파일 만들기
+- appServlet 폴더에서 마우스 오른쪽 클릭 > New > other > Spring Bean Configuration File 선택
+- security-context 입력 후 New > XSD 네임스페이스 선언 선택 항목들 중에서 beans, security 체크 후 
+  하단의 박스 항목 중에서 첫번째 항목 체크 후 Finish 버튼 클릭
+  
+  
+  3. security-context.xml 파일에 암호화 클래스 빈 등록
+  
+  <bean id="bCryptPasswordEncoder" class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder"></bean>
+  
+  
+  4. dispatcherServlet이 보안관련 설정 파일 정보를 읽어들일 수 있도록 web.xml에 파일 경로 추가하기
+  - web.xml 파일에 servlet-context.xml 파일이 파라미터 값으로 입력된 곳에 다음 줄에 security-context.xml의 경로를 추가함
+  
+ 	<servlet>
+		<servlet-name>appServlet</servlet-name>
+		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+		<init-param>
+			<param-name>contextConfigLocation</param-name>
+			<param-value>
+			/WEB-INF/spring/appServlet/servlet-context.xml
+			/WEB-INF/spring/appServlet/security-context.xml
+			</param-value>
+		</init-param>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+	
+5. MemberServiceImpl.java 의 insertMember() 메소드에서 비밀번호 암호화하기
+
+	//회원가입
+	@Override
+	public int insertMember(MemberVO vo) {
+		
+		//비밀번호 암호화 관련 구문 추가
+		
+		//사용자가 입력한 비밀번호
+		String rawPassword = vo.getMember_pw();
+		
+		//비밀번호 암호화 객체를 이용해서 암호화한 비밀번호
+		String encodePassword = bCryptPasswordEncoder.encode(rawPassword);
+		System.out.println("암호화된 비밀번호: "+encodePassword);
+		
+		//암호화 전 비밀번호의 암호화 후 비밀번호가 일치하는지 확인
+		System.out.println("암호화 전 비밀번호와 암호화 후 비밀번호의 일치여부: "+bCryptPasswordEncoder.matches(rawPassword, encodePassword));
+		
+		//암호화된 비밀번호를 MemberVO에 세팅하기
+		vo.setMember_pw(encodePassword);
+		
+		return dao.insertMember(vo);
+	}
+  
+6. DB에 저장된 비밀번호 확인하기
+
+7. 로그인이 정상적으로 이루어지도록 MemberDAO와 MemberMapper.xml 파일을 변경함
+
+(1) MemberDAO
+	//비밀번호 암호화 관련 객체 의존자동주입 받기
+	private BCryptPasswordEncoder bCryptPasswordEncoder;
+	... 중략 ...
+	
+	//	//로그인(비밀번호 암호화 전)
+//	public MemberVO login(Map<String, String> map) {
+//		MemberVO vo = null;//로그인 실패시 결과값
+//		try {
+//			vo = sqlSession.selectOne(MAPPER+".login", map);
+//		} catch (Exception e) {
+//			System.out.println("로그인 중 예외발생");
+//		}
+//		
+//		return vo;
+//	}
+	//로그인(비밀번호 암호화 후)
+	public MemberVO login(Map<String, String> map) {
+		MemberVO vo = null;//로그인 실패시 결과값
+		try {
+			
+			//아이디를 이용해서 회원이 비밀번호를 가져와서 비밀번호의 일치여부를 확인한 후
+			//아이디에 대한 회원정보를 MemberVO 객체로 반환하도록 변경함 
+			String encodePassword = sqlSession.selectOne(MAPPER+".getPassword", map.get("member_id"));
+			boolean flag = bCryptPasswordEncoder.matches(map.get("member_pw"), encodePassword);
+			if(flag) {//비밀번호가 일치하는 경우
+				vo = sqlSession.selectOne(MAPPER+".login", map.get("member_id"));
+			}
+			
+			
+			
+		} catch (Exception e) {
+			System.out.println("로그인 중 예외발생");
+			e.printStackTrace();
+		}
+		
+		return vo;
+	}
+	
+(2) MemberMapper.xml
+
+<!-- 로그인(비밀번호 암호화 전) 
+	<select id="login" parameterType="map" resultType="memberVO">
+	
+		select * from tb_member
+			where member_id=#{member_id}
+			and member_pw=#{member_pw}
+			and member_status='N'
+	
+	</select> -->
+	
+	<!--  로그인(비밀번호 암호화 후) -->
+	<select id="getPassword" parameterType="string" resultType="string">
+	
+		select member_pw from tb_member
+			where member_id = #{member_id}
+			and member_status = 'N'
+			
+	</select>
+
+8. 회원정보 변경이 정상적으로 이루어지도록 MemberServiceImpl의 updatemember()메소드 변경
+  
+  //	//회원정보 변경(비밀번호 암호화 전)
+//	@Override
+//	public MemberVO updateMember(MemberVO vo) {
+//		MemberVO newVo = null; //회원정보 변경 실패시 결과값
+//		
+//		if(dao.updateMember(vo) == 1) {
+//			newVo = dao.getMember(vo.getM_idx());
+//		}
+//		
+//		return newVo;
+//	}
+	
+	//회원정보 변경(비밀번호 암호화 후)
+		@Override
+		public MemberVO updateMember(MemberVO vo) {
+			MemberVO newVo = null; //회원정보 변경 실패시 결과값
+			
+			//비밀번호 암호화 후 MemberVO 객체에 세팅하기
+			String rawPassword = vo.getMember_pw();
+			String encodePassword = bCryptPasswordEncoder.encode(rawPassword);
+			vo.setMember_pw(encodePassword);
+			
+			if(dao.updateMember(vo) == 1) {//회원정보 변경 성공
+				newVo = dao.getMember(vo.getM_idx());
+			}
+			
+			return newVo;
+		}
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+ 
+ 

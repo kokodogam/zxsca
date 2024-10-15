@@ -1,0 +1,225 @@
+>>> 회원관리시스템에서 회원가입시 이메일 인증 구현하기<<<
+
+1. pom.xml에 메일인증 관련 의존모듈 추가하기
+
+		<dependency>
+			<groupId>javax.mail</groupId>
+			<artifactId>mail</artifactId>
+			<version>1.4.7</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-context-support</artifactId>
+			<version>5.3.9</version>
+		</dependency>
+		
+2. join.jsp 메일인증 관련 구문 추가하기
+     <div>
+        	<input type="text" id="auth_num_input" placeholder="인증번호 6자리를 입력해 주세요"
+        		disabled="disabled" maxlength="6">
+        	<input type="button" id="confirm_email_btn" value="인증확인">
+        </div>
+        <input type="hidden" name="result_confirm" id="result_confirm">
+        <div id="resultEmail"></div>
+        
+        
+ 3. join.js 메일인증 관련 구문 추가하기(기존의 아이디 중복검사에 추가된 구문)
+ 
+ //아이디 중복검사
+$(function(){
+	
+	$("#checkId").on("click", function(){
+		
+		const member_id = $("#member_id").val();
+		
+		if(member_id.length === 0){
+			alert("아이디가 입력되지 않았습니다.");
+			frmJoin.member_id.focus();
+		}else{
+			
+			$.ajax({//ajax(): 비동기통신을 할 수 있도록 지원하는 메소드
+				type:"post", //서버로 요청하는 방식
+				url:"checkId.do", //서보로 보낼 url
+				data:{"member_id": member_id}, //서버로 보낼 데이터
+				success: function(resData){ //요청에 대한 응답이 성공적으로 이루어진 경우
+					const msg = $("#resultMsg");
+					msg.show();//중복검사 결과를 띄우는 div를 보이게 함
+					
+					//유의사항: 응답내용에서 공백을 제거해줘야 정상적인 결과값을 얻어서 처리할 수 있음
+					if(resData.trim() === "PASS"){//trim(): 앞 뒤 공백 제거
+						msg.html("사용 가능한 아이디입니다.").css("color", "green");
+						
+						//중복검사 버튼을 메일 인증 버튼으로 바꾸고 메일인증 버튼을 클릭하면 메일 보내기
+						const checkIdBtn = $("checkId");
+						checkIdBtn.val("메일인증");
+						checkIdBtn.attr("id", "email_auth_btn").on("click", function(){
+							msg.hide();
+							sendEmail();
+						});
+						
+										
+					}else{
+						msg.html("이미 사용중인 아이디입니다.").css("color", "red");
+						$("#member_id").val("").trigger("focus");//trigger("이벤트이름")
+						//이벤트를 강제로 발생시킴
+					}
+				},
+				error: function(error){ //요청에 대한 응답이 실패한 경우
+					console.log("아이디 중복검사 중 에러 발생");
+				    console.log(error);
+				}
+			});//end of ajax
+			
+		}
+		
+		
+	});
+	
+///// Email. 인증관련 추가 구문 ////
+let code;
+const checkInput = $("#auth_num_input"); //인증번호 입력 input
+const confirmEmailBtn = $("confirm_email_btn") //인증확인 버튼
+const resultMsg = $("resultEmail");//인증결과 출력 div
+
+function sendEmail(){
+	const email = $("#member_id").val();//메일 주소
+	
+	$.ajax({
+		type: "post",
+		url: "checkEmail.do",
+		data: {email: email},
+		success: function(data){
+			checkInput.attr("disabled",false);//인증번호 입력란을 활성화시킴
+			code=data.trim();//공백 제거 후 서버에서 받은 인증번호를 code에 저장
+			alert("인증번호가 전송되었습니다");
+		},
+		error: function(e){
+			console.log("인증번호 받기 중 에러발생");
+		}
+		
+	});
+}
+
+
+//사용자가 자신의 메일에서 인증번호를 확인한 후 인증번호 입력란에 인증번호를 입력하고 난 뒤
+//인증확인 버튼을 클릭한 경우 처리 구문
+confirmEmailBtn.on("click", function(){
+	
+	const inputCode = checkInput.val(); //인증번호 입력란에 입력된 값
+	resultMsg.show(); //결과 출력 div 화면에 보이게 하기
+	const resultEmailAuth = $("#result_confirm") //인증결과를 넘겨줄 input hidden 태그
+
+	if(inputCode == code){//입력된 인증번호와 서버에서 받은 인증코드가 일치하면
+		resultMsg.html("정상적으로 인증되었습니다");
+		resultMsg.css("color, "green");
+		resultEmailAuth.val("PASS"); //메일인증 성공(유효성 검사시 사용)
+		
+	}else{
+		resultMsg.html("인증번호가 일치하지 않습니다. 다시 확인해 주세요");
+		resultMsg.css("color, "red");
+		resultEmailAuth.val("FAIL"); //메일인증 실패(유효성 검사시 사용)
+	}
+});
+
+//입력 커서가 비밀번호에 놓여지면 메시지를 보이지 않도록 함
+$("#member_pw").on("focus", ()=>{
+			const msg = $("#resultMsg");
+			if(msg.text() === "사용 가능한 아이디입니다." &&
+			resultMsg.text() === "정상적으로 인증되었습니다"){
+				msg.hide();
+				resultMsg.hide();
+				
+				//인증번호를 지우고 인증번호 입력란과 인증번호 버튼 비활성화
+				checkInput.val("");
+				checkInput.attr("disabled", true);
+				confirmEmailBtn.attr("disabled", true);
+			}
+		});
+
+
+4. AjaxController.java에 이메일 인증 요청 처리 구문 추가
+
+	//이메일 인증
+	@PostMapping("/member/checkEmail.do")
+	public String checkEmail(String email) {
+		System.out.println("이메일 인증 이메일: "+email);
+		return memberServiceImpl.authEmail(email);
+	}
+	
+5. MemberServiceImpl.java에 
+
+	//메일인증 관련 메일전송 객체 의존자둥주입 받기
+	private JavaMailSenderImpl mailSender;
+ 
+ 	... 중략 ...
+ 	
+ 		//메일인증
+	@Override
+	public String authEmail(String email) {
+		//메일인증 코드 6자리 생성하기: Math.random() (111111 <= r < 1000000)
+		int authNumber = (int)(Math.random()*888889)+111111;
+		
+		String setFrom = "kokodogam20@gmail.com"; //송신자의 메일주소
+		String toMail = email;//수신자의 메일주소
+		String title = "회원가입 인증 메일입니다";//제목
+		String content = "홈페이지를 방문해주셔서 감사합니다. <br><br>"
+				+ "인증번호: "+authNumber+"<br>"
+				+ "해당 인증번호를 인증번호 확인란에 입력해 주세요";
+		mailSend(setFrom, toMail, title, content);
+		return Integer.toString(authNumber);
+	}
+	
+	//이메일 전송 메소드
+	private void mailSend(String setFrom, String toMail, String title, String content) {
+		MimeMessage message = mailSender.createMimeMessage();
+		
+		try {
+			MimeMessageHelper helper = new MimeMessageHelper(message, true, "utf-8");
+			//true: multipart 형식의 메시지 전달
+			helper.setFrom(setFrom);
+			helper.setTo(toMail);
+			helper.setSubject(title);
+			helper.setText(content, true); //true: html형식으로 전송, true를 입력하지 않으면 text로 전송
+			mailSender.send(message);
+			
+		} catch (Exception e) {
+			System.out.println("메일전송 중 예외발생");
+		}
+		
+	}
+	
+6. root-context.xml에 JavaMailSenderImpl 클래스를 빈 등록하기
+
+<!--  이메일 인증 관련 빈 등록 -->
+<bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
+		<property name="host" value="smtm.gmail.com"/>
+		<property name="port" value="587"/>
+		<property name="username" value="palawanicus1014@gmail.com"/>
+		<property name="password" value="2단계인증 보안코드"/>
+		<property name="javaMailProperties">
+			<props>
+				<prop key = "mail.transport.protocol">smtp</prop>
+				<prop key = "mail.smtp.auth">true</prop>
+				<prop key = "mail.smtp.socketFactory.class">javax.net.ssl.SSLSocketFactory</prop>
+				<prop key = "mail.smtp.starttls.enable">ture</prop>
+				<prop key = "mail.debug">true</prop>
+				<prop key = "mail.smtp.ssl.trust">smtp.gmail.com</prop>
+				<prop key = "mail.smtp.ssl.protocols">TLSv1.2</prop>
+			</props>
+	</property>
+</bean>
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+ 
