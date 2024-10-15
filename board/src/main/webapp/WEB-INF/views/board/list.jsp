@@ -7,28 +7,14 @@
 <head>
 <meta charset="UTF-8">
 <title>글목록</title>
+<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/resources/css/board_list.css">
 </head>
 <body>
 
-    <div id="wrap">
-        <div id="search-container">
-            <div id="div-total">총게시물수: ${boardList.size()}</div>
-            <div id="div-search">
-                <form>
-                    <select name="searchField">
-                        <option value="title">제목</option>
-                        <option value="content">내용</option>
-                        <option value="writer">작성자</option>
-                    </select>
-                    <input type="text" name="searchWord" id="searchWord">
-                    <input type="submit" id="search_btn" value="검색">
-                </form>
-            </div>
-        </div>
-
-        <table border="1">
+    <div class="wrap">
+        <table class="board-table">
             <tr>
-                <th>구분</th>
+                <th>번호</th>
                 <th>제목</th>
                 <th>작성자</th>
                 <th>작성일</th>
@@ -59,23 +45,31 @@
                     </c:forEach>
                 </c:otherwise>
             </c:choose>
-
+		</table>
+		
+		<!-- 검색기능 -->
+		<div class="search-container">
+            <div class="search-box">
+                <form>
+                    <select name="searchField" class="search-field">
+                        <option value="title">제목</option>
+                        <option value="content">내용</option>
+                        <option value="writer">작성자</option>
+                    </select>
+                    <input type="text" name="searchWord" class="search-word">
+                    <input type="submit" id="search_btn" value="검색">
+             
+         
             <!-- 회원인 경우 글등록할 수 있도록 글등록 버튼 구현 -->
              
-                <tr>
-                    <td colspan="5">
+               
                         <a href="${pageContext.request.contextPath}/board/write.do">
-                            <button type="button" id="write_btn">글등록</button> 
+                            <button type="button" id="write_btn">글쓰기</button> 
                         </a>
-                    </td>
-
-                </tr>
-
-            
-            
-        </table>
-
-    </div>
+                        </form>
+                </div>
+            </div>
+    	</div>
 
 </body>
 </html>

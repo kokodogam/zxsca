@@ -7,6 +7,7 @@
 <head>
 <meta charset="UTF-8">
 <title>상세보기</title>
+<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/resources/css/notice_view.css">
 <!-- jQuery API 추가  -->
 <script src="${pageContext.request.contextPath}/resources/js/jquery-3.7.1.min.js"></script>
 
@@ -22,15 +23,19 @@
 </head>
 <body>
     <div id="wrap">
-        <h2>상세보기</h2>
-        <div id="container">
-            <div>작성자: ${noticeVO.nb_writer}</div>
-            <div>제목: ${noticeVO.nb_title}</div>
-            <div>내용: ${noticeVO.nb_content}</div>
-            <div>조회수: ${noticeVO.read_cnt}</div>
-            <div>작성일: <fmt:formatDate value="${noticeVO.post_date}" type="date"
-                                    pattern="yyyy-MM-dd hh:mm:ss" /></div>
-             
+        <h2>사내 공지</h2>
+        <div class="board-container">
+        <div class="detail-header">
+		<h2 class="detail-title">${noticeVO.nb_title}</h2>
+		<div class="detail-meta">
+            <span>작성자: ${noticeVO.nb_writer}</span> | 
+					<span>조회수: ${noticeVO.read_cnt}</span> | 
+					<span>작성일: <fmt:formatDate value="${noticeVO.post_date}" type="date" pattern="yyyy-MM-dd hh:mm:ss" /></span>
+				</div>
+			</div>
+			<div class="detail-content">
+				<p>${boardVO.b_content}</p>
+			</div>
             <div>첨부파일:
             <c:if test="${not empty noticeVO.attachedList}">
             	<div>
@@ -51,11 +56,11 @@
             <div id="div-bundle-btn">
                 <!-- 조건: 회원 + 자신이 쓴 게시글 -->
                 <c:if test="${(not empty member) and (member.m_idx eq noticeVO.m_idx)}">
-                    <input type="button" value="수정하기" onclick="location.href='update.do?nb_idx=${noticeVO.nb_idx}'">
-                    <input type="button" value="삭제하기" onclick="deletePost()">
+                    <button class="btn btn-edit" onclick="location.href='update.do?b_idx=${noticeVO.nb_idx}'">수정하기</button>
+					<button class="btn btn-delete" onclick="deletePost()">삭제하기</button>
                 </c:if>
                 
-                <input type="button" value="목록보기" onclick="location.href='${pageContext.request.contextPath}/index.do'">
+                <button class="btn btn-back" onclick="location.href='${pageContext.request.contextPath}/index.do'">목록으로</button>
             </div>
         </div>
 
