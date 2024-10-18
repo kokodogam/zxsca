@@ -1,0 +1,66 @@
+>>> 파일업로드 게시판 구현 <<<
+
+1. 파일업로드 관련 API를 pom.xml에 의존모듈로 추가하기
+commons-fileupload 1.4.jar
+
+<!-- https://mvnrepository.com/artifact/commons-fileupload/commons-fileupload -->
+<dependency>
+    <groupId>commons-fileupload</groupId>
+    <artifactId>commons-fileupload</artifactId>
+    <version>1.4</version>
+</dependency>
+
+2. servlet-context.xml 파일에 MultipartResolver 객체를 빈 등록
+
+	<beans:bean id="multipartResolver"
+				class="org.springframework.web.multipart.support.StandardServletMultipartResolver">
+	</beans:bean>
+
+3. web.xml에 <servlet>태그 내에 multipart-config 설정 정보 추가
+
+	<multipart-config>
+		<max-file-size>5242880</max-file-size><!-- 업로드할 한 개 파일의 최대 크기: 5MB(1024*1024*5)-->
+		<max-request-size>20971520</max-request-size><!-- 한번에 업로드할 수 있는 파일들의 최대 크기: 20MB(1024*1024*20)-->
+		<file-size-threshold>5242880</file-size-threshold><!-- 파일 한 개가 5MB(1024*1024*5)를 초과하면 임시 디렉토리에 저장
+	</multipart-config>
+
+4. webapp/resources/uploads 폴더를 만들고 톰캣이 바로 인식할 수 있도록 파일 1개를 복붙함
+
+5. 파일 업로드 게시판(공지사항) 테이블 생성하기
+
+1. 파일 업로드 게시판(공지사항) 테이블 생성하기
+
+create table tb_notice_board(
+b_idx int unsigned auto_increment, #공지사항 번호
+b_writer varchar(30) not null, #작성자
+b_title varchar(100) not null, #제목
+b_content varchar(2000) not null, #내용
+read_cnt int unsigned default 0, #조회수
+post_date datetime default now(), #등록일
+update_date datetime default now(), #수정일
+b_status char(1) default 'N', #게시글 상태(N:삭제요청없음, Y:삭제요청함)
+m_idx int unsigned not null,
+constraint tb_notice_board_pk primary key (b_idx), #기본키
+constraint tb_notice_board_fk foreign key(m_idx)
+	references tb_member(m_idx) #외래키
+);
+
+-- 첨부파일 테이블 생성하기
+create table tb_notice_attached(
+na_idx int unsigned auto_increment, #첨부파일 번호
+dorigin_filename varchar(50), #원본 파일명
+save_filename varchar(50), #저장 파일명
+na_status char(1) default 'N' #첨부파일 상태(N:승인되지 않음, Y:승인됨)
+nb_idx int unsigned not null, #공지사항 번호
+constraint tb_notice_attached_pk primary key (na_idx), #기본키
+constraint tb_notice_attached_fk foreign key (nb_idx)
+	references tb_notice_board (nb_idx) on delete cascade #외래키(연결된 공지사항 게시글이 삭제되면 함께 삭제처리)
+);	
+	
+	
+	
+	
+	
+	
+	
+	

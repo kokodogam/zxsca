@@ -1,0 +1,160 @@
+>>> 예외 처리  구현 <<<
+
+1. pom.xml에 의존모듈 추가
+
+<!-- 예외처리 관련 의존모듈 추가 -->
+	<dependency>
+		<groupId>org.springframework</groupId>
+		<artifactId>spring-webmvc</artifactId>
+		<version>${org.springframework-version}</version>
+	</dependency>
+
+2. @ControllerAdvice, @ExceptionHandler를 이용한 예외처리 구현
+
+(1) @ControllerAdvice, @RestControllerAdvice
+- 모든 컨트롤러에서 발생하는 예외를 전역적으로 처리할 수 있는 기능을 제공
+- 코드 중복을 줄이고 일관된 예외 처리를 할 수 있음
+- 동작원리: 프로그램 실행 중 발생한 예외가 DispatcherServlet에게 전달되고 DispatcherServlet에서 예외를 캐치한 후
+  예외를 처리하기 위한 메소드가 실행됨 -> ExceptionHandlerExceptionResolver가 해당 예외를 처리하기 위해 위임받으며
+  전달받은 예외에 대한 @ExceptionHandler메소드를 찾음(기본 설정은 컨트롤러 클래스 계층에서 메소드를 먼저 찾고 없는 경우에는 
+  스프링 빈 ControllerAdvice를 찾음) -> 정상적으로 @ExceptionHandler 메소드를 찾으면 메소드 실행에 필요한 argumentResolvers,
+  returnValueHandlers... 세팅과 같은 사전 작업을 진행한 후 리플렉션을 활용해 해당 메소드를 실행시킴
+  
+(2) @ExceptionHandler
+- ExceptionHandlerExceptionResolver에 의해 각 컨트롤러 클래스 내에서 특정 예외를 처리할 수 있게 함
+- @ExceptionHandler 어노테이션을 사용하여 해당 메소드가 어떤 예외를 처리할지 지정함
+  ** ExceptionHandlerExceptionResolver: 스프링에서 관리되는 ExceptionResolver 중에서 가장 우선순위가 높은 객체로
+     @ExceptionHandler 어노테이션을 처리하기 위한 ExceptionResolver
+     
+ (구현 예)
+ 
+ @Order(1) //우선순위 설정: 최우선순위 -1(낮을수록 높은 우선순위를 가짐)
+@ControllerAdvice //모든 컨트롤러에 대한 예외 처리
+public class GlobalExceptionHandler {
+	
+	//모든 예외에 대한 처리
+	@ExceptionHandler(Exception.class)
+	public String handleException(Exception e, HttpServletRequest request, Model model) {
+		
+		//예외 정보 구성
+		model.addAttribute("time", Calendar.getInstance().getTime()); //예외 발생 시간
+		model.addAttribute("url", request.getServletPath()); //예외 발생 URL
+		model.addAttribute("message", e.getMessage()); //예외 메시지
+		//예외 상세내용
+		StringWriter sw = new StringWriter();
+		PrintWriter pw = new PrintWriter(sw);
+		e.printStackTrace(pw); //스택 트레이스를 PrintWriter로 출력
+		String stackTrace = sw.toString(); //문자열로 변환
+		model.addAttribute("stackTrace", stackTrace);
+		
+		return "error/error";
+	}
+
+}
+ (예외처리 페이지 구현 예)
+ <%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>에러 페이지</title>
+</head>
+<body>
+<h3>에러</h3>
+<hr>
+<p>
+	서비스 중 에러가 발생했습니다.<br>
+	아래 에러 정보를 확인해 주세요.<p>
+	
+	[에러 정보]<br>
+	발생 시간: ${time}<br>
+	에러 URL: ${url}<br>
+	에러 메시지: ${message}<br>
+	상세내용:<br>
+	${stackTrace}<br>
+</p>
+<p><a href="${pageContext.request.contextPath}/">홈으로 돌아가기</a></p>
+</body>
+</html>
+
+
+
+(3) @ControllerAdvice에서 404에러를 처리하기 위해 web.xml파일에 추가해줘야할 초기화 파라미터
+- 404 에러는 서버가 체크해서 발생시키는 에러이므로 Controller까지 전달되지 않는데 이를 원하는 에러
+  페이지로 처리하려면 404에러 발생 시 예외를 발생하도록 설정해줘야 함. 이를 위해 DispatcherServlet
+  등록 시 throwExceptionIfNoHandlerFound의 초기값을 true로 설정해줌
+  	<!-- Processes application requests -->
+	<servlet>
+		<servlet-name>appServlet</servlet-name>
+		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+		<init-param>
+			<param-name>contextConfigLocation</param-name>
+			<param-value>
+			/WEB-INF/spring/appServlet/servlet-context.xml
+			/WEB-INF/spring/appServlet/security-context.xml
+			</param-value>
+		</init-param>
+		
+		<!-- 404에러를 @ControllerAdvice에서 처리하기 위해 추가 -->
+		<init-param>
+			<param-name>throwExceptionIfNoHandlerFound</param-name>
+			<param-value>true</param-value>
+		</init-param>
+		
+		
+		<load-on-startup>1</load-on-startup>
+		<multipart-config>
+			<max-file-size>5242880</max-file-size><!-- 업로드할 한 개 파일의 최대 크기: 5MB(1024*1024*5)-->
+			<max-request-size>20971520</max-request-size><!-- 한번에 업로드할 수 있는 파일들의 최대 크기: 20MB(1024*1024*20)-->
+			<file-size-threshold>5242880</file-size-threshold><!-- 파일 한 개가 5MB(1024*1024*5)를 초과하면 임시 디렉토리에 저장-->
+		</multipart-config>
+		
+	</servlet>
+	
+(4) web.xml 파일에 서버에서 처리하는 JSP 에러에 대한 처리
+
+<error-page>
+  	<error-code>500</error-code>
+  	<location>/error/error500.do</location>
+  </error-page>
+  
+(HomeController에서 /error/error500.do 요청에 대한 처리 예)
+
+@GetMapping("/error/error500.do")
+	public String error500(Exception e, HttpServletRequest request, Model model) {
+		
+		//예외 정보 구성
+		model.addAttribute("time", Calendar.getInstance().getTime()); //예외 발생 시간
+		model.addAttribute("url", request.getServletPath()); //예외 발생 URL
+		model.addAttribute("message", e.getMessage()); //예외 메시지
+		//예외 상세내용
+		StringWriter sw = new StringWriter();
+		PrintWriter pw = new PrintWriter(sw);
+		e.printStackTrace(pw); //스택 트레이스를 PrintWriter로 출력
+		String stackTrace = sw.toString(); //문자열로 변환
+		model.addAttribute("stackTrace", stackTrace);
+		
+		return "error/error";
+	}
+
+(5) Spring의 애플리케이션 컨텍스트 초기화 과정에서 발생하는 예외
+	- @ExceptionHandler를 사용한 전역 예외 처리 방식으로는 이 예외를 처리할 수 없음
+	(예) XML 설정 파일 작성 오류 등으로 발생하는 404 에러
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

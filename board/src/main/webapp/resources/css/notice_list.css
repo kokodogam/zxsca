@@ -1,0 +1,148 @@
+/* 공통 스타일 */
+
+h2{
+	text-align: center;
+	
+}
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f9;
+    margin: 0;
+    padding: 0;
+    color: #333;
+}
+
+#wrap {
+    width: 80%;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #fff;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+/* 검색 컨테이너 스타일 */
+.search-container {
+    display: flex;
+    justify-content: right;
+    align-items: center;
+    margin-top: 20px;
+}
+
+.total-count {
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.search-box form {
+    display: flex;
+    align-items: center;
+}
+
+.search-field, .search-word {
+    padding: 8px;
+    margin-right: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 14px;
+}
+
+/* 테이블 스타일 */
+#board-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+
+#board-table th, #board-table td {
+    border: 1px solid #ddd;
+    padding: 12px;
+    text-align: center;
+}
+
+#board-table th {
+    background-color: #f8f9fa;
+    font-weight: bold;
+    color: #333;
+}
+
+#board-table td a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+#board-table td a:hover {
+    text-decoration: underline;
+}
+
+#board-table tbody tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+.board-table th {
+    background-color: #f2f2f2;
+    font-weight: bold;
+}
+/* 글번호 */
+.board-table th:nth-child(1) {
+    width: 10%;
+}
+
+/* 제목 */
+.board-table th:nth-child(2) {
+    width: 40%;
+}
+
+/* 작성자 */
+.board-table th:nth-child(3) {
+    width: 15%;
+}
+
+/* 작성일 */
+.board-table th:nth-child(4) {
+    width: 15%;
+}
+
+/* 조회수  */
+.board-table th:nth-child(5) {
+    width: 10%;
+}
+/* 첨부 */
+.board-table th:nth-child(6) {
+    width: 10%;
+}
+
+
+/* 첨부파일 아이콘 */
+.attachment-icon {
+    width: 15px;
+    height: 17px;
+}
+
+/* 글 등록 버튼 */
+#write-btn-container {
+    text-align: right;
+}
+
+#write_btn {
+    background-color: #5656e3;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    font-size: 14px;
+    cursor: pointer;
+    border-radius: 5px;
+    margin-left: 10px;
+}
+
+#write_btn:hover {
+    background-color: #0056b3;
+}
+#search_btn{
+	background-color: #838973;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    font-size: 14px;
+    cursor: pointer;
+    border-radius: 5px;
+    margin-left: 10px;
+}

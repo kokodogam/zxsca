@@ -1,0 +1,17 @@
+>>> 일반 게시판 구현 <<<
+
+1. 일반게시판 테이블 생성하기
+
+create table tb_board(
+b_idx int unsigned auto_increment, #게시글 번호
+b_writer varchar(30) not null, #작성자
+b_title varchar(100) not null, #제목
+b_content varchar(2000) not null, #내용
+read_cnt int unsigned default 0, #조회수
+post_date datetime default now(), #등록일
+update_date datetime default now(), #수정일
+b_status char(1) default 'N', #게시글 상태(N:삭제요청없음, Y:삭제요청함)
+m_idx int unsigned not null,
+constraint tb_board_pk primary key (b_idx), #기본키
+constraint tb_board_fk foreign key(m_idx)
+	references tb_member(m_idx) #외래키

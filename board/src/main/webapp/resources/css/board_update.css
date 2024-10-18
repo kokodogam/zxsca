@@ -1,0 +1,111 @@
+/* 전체 레이아웃 */
+.wrap {
+    width: 60%;
+    margin: 50px auto;
+    font-family: 'Arial', sans-serif;
+}
+
+.form-title {
+    font-size: 2rem;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 30px;
+    color: #333;
+}
+
+.form-container {
+    background-color: #fff;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* 입력 필드  */
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    font-size: 1rem;
+    color: #555;
+    margin-bottom: 5px;
+}
+
+.form-group input[type="text"],
+.form-group textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1rem;
+    color: #333;
+    box-sizing: border-box;
+}
+
+.form-group input[type="text"]:focus,
+.form-group textarea:focus {
+    border-color: #008CBA;
+    outline: none;
+}
+
+/* 버튼 그룹 */
+.form-btn-group {
+    text-align: right;
+    margin-top: 20px;
+}
+
+.btn {
+    padding: 10px 20px;
+    font-size: 1rem;
+    margin-left: 10px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+/* 버튼 스타일 */
+.btn-submit {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.btn-submit:hover {
+    background-color: #45a049;
+}
+
+.btn-reset {
+    background-color: #f0ad4e;
+    color: white;
+}
+
+.btn-reset:hover {
+    background-color: #ec971f;
+}
+
+.btn-back {
+    background-color: #008CBA;
+    color: white;
+}
+
+.btn-back:hover {
+    background-color: #007bb5;
+}
+
+/* 반응형  */
+@media (max-width: 768px) {
+    .wrap {
+        width: 90%;
+    }
+
+    .form-btn-group {
+        text-align: center;
+    }
+
+    .btn {
+        margin-top: 10px;
+        width: 100%;
+    }
+}
