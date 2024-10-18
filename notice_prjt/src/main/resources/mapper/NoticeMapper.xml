@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.human.web.mapper.NoticeMapper">
+  
+    <!-- 글등록 -->
+    <insert id="insertNotice" parameterType="noticeVO">
+        insert into tb_notice ( n_category, n_title, n_content)
+        values (#{n_category}, #{n_title}, #{n_content})
+    </insert>
+
+    <!-- 글목록 조회 -->
+    <select id="getNoticeList" resultType="noticeVO">
+        select * from tb_notice
+        where n_status = 'N'
+        order by n_idx desc
+    </select>
+    
+    <!-- 게시글 조회 -->
+    <select id="getNotice" parameterType="_int" resultType="noticeVO">
+        select * from tb_notice
+        where n_idx = #{n_idx}
+    </select>
+    
+    <!-- 조회수 증가시키기 -->
+    <update id="updateReadCount" parameterType="int">
+        update tb_notice set read_cnt = read_cnt+1 
+        where n_idx = #{n_idx}
+    </update>
+</mapper>
